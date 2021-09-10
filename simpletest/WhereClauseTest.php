@@ -1,4 +1,7 @@
 <?php
+
+use MeekroDB\WhereClause;
+
 class WhereClauseTest extends SimpleTest {
   function test_1_basic_where() {
     $where = new WhereClause('and');
@@ -79,5 +82,3 @@ class WhereClauseTest extends SimpleTest {
   
 
 }
-
-?>

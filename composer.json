@@ -16,14 +16,20 @@
         {
             "name": "Sergey Tsalkov",
             "email": "stsalkov@gmail.com"
+        },
+        {
+            "name": "Michal Stefanak",
+            "role": "Developer",
+            "homepage": "https://www.linkedin.com/in/michalstefanak/"
         }
     ],
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=7.1.0",
+        "ext-mysqli": "*"
     },
     "autoload": {
-        "classmap": [
-            "db.class.php"
-        ]
+        "psr-4": {
+            "MeekroDB\\": "src/"
+        }
     }
 }

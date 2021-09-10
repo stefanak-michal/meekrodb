@@ -1,5 +1,7 @@
 <?php
 
+use MeekroDB\MeekroDBException;
+
 class WalkTest extends SimpleTest {
   function test_1_walk() {
     $Walk = DB::queryWalk("SELECT * FROM accounts");
