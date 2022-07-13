@@ -1,9 +1,10 @@
 {
-    "name": "sergeytsalkov/meekrodb",
+    "name": "stefanak-michal/meekrodb",
     "description": "The Simple PHP/MySQL Library",
     "homepage": "http://www.meekro.com",
     "support": {
-        "email": "support@meekro.com"
+        "issues": "https://github.com/stefanak-michal/meekrodb/issues",
+        "docs": "https://meekro.com/"
     },
     "keywords": [
         "mysql",
@@ -26,6 +27,9 @@
     "require": {
         "php": ">=7.1.0",
         "ext-mysqli": "*"
+    },
+    "provide": {
+        "sergeytsalkov/meekrodb": "The Simple PHP/MySQL Library"
     },
     "autoload": {
         "psr-4": {
