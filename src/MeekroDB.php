@@ -32,9 +32,10 @@ final class MeekroDB
     public $param_char = '%';
     public $named_param_seperator = '_';
     public $nested_transactions = false;
-    public $ssl = array('key' => '', 'cert' => '', 'ca_cert' => '', 'ca_path' => '', 'cipher' => '');
+    public $ssl = null;
     public $connect_options = array(MYSQLI_OPT_CONNECT_TIMEOUT => 30);
     public $logfile;
+    public $connect_flags = 0;
 
     // internal
     private $internal_mysql = null;
@@ -100,9 +101,12 @@ final class MeekroDB
             $this->current_db = $this->dbName;
             $mysql = new mysqli();
 
-            $connect_flags = 0;
-            if ($this->ssl['key']) {
-                $mysql->ssl_set($this->ssl['key'], $this->ssl['cert'], $this->ssl['ca_cert'], $this->ssl['ca_path'], $this->ssl['cipher']);
+            $connect_flags = $this->connect_flags;
+            if (is_array($this->ssl)) {
+                // PHP produces a warning when trying to access undefined array keys
+                $ssl_default = array('key' => NULL, 'cert' => NULL, 'ca_cert' => NULL, 'ca_path' => NULL, 'cipher' => NULL);
+                $ssl = array_merge($ssl_default, $this->ssl);
+                $mysql->ssl_set($ssl['key'], $ssl['cert'], $ssl['ca_cert'], $ssl['ca_path'], $ssl['cipher']);
                 $connect_flags |= MYSQLI_CLIENT_SSL;
             }
             foreach ($this->connect_options as $key => $value) {
