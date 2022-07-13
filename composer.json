@@ -6,6 +6,12 @@
         "issues": "https://github.com/stefanak-michal/meekrodb/issues",
         "docs": "https://meekro.com/"
     },
+    "funding": [
+        {
+            "type": "ko-fi",
+            "url": "https://ko-fi.com/michalstefanak"
+        }
+    ],
     "keywords": [
         "mysql",
         "database",
