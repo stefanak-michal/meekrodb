@@ -453,12 +453,25 @@ final class MeekroDB
         return $this->nested_transactions_count;
     }
 
-    function formatTableName(string $table): string
+    private function formatBackticks(string $name, bool $split_dots = true): string
     {
-        $table = trim($table, '`');
+        $name = trim($name, '`');
 
-        if (strpos($table, '.')) return implode('.', array_map(array($this, 'formatTableName'), explode('.', $table)));
-        else return '`' . str_replace('`', '``', $table) . '`';
+        if ($split_dots && strpos($name, '.')) {
+            return implode('.', array_map(array($this, 'formatBackticks'), explode('.', $name)));
+        }
+
+        return '`' . str_replace('`', '``', $name) . '`';
+    }
+
+    private function formatTableName(string $table): string
+    {
+        return $this->formatBackticks($table);
+    }
+
+    private function formatColumnName(string $column): string
+    {
+        return $this->formatBackticks($column, false);
     }
 
     /**
@@ -512,12 +525,12 @@ final class MeekroDB
         if (isset($options['update']) && is_array($options['update']) && $options['update'] && $which == 'INSERT') {
             if (array_values($options['update']) !== $options['update']) {
                 return $this->query(
-                    str_replace('%', $this->param_char, "INSERT INTO %b %lb VALUES $var ON DUPLICATE KEY UPDATE %hc"),
+                    str_replace('%', $this->param_char, "INSERT INTO %b %lc VALUES $var ON DUPLICATE KEY UPDATE %hc"),
                     $table, $keys, $values, $options['update']);
             } else {
                 $update_str = array_shift($options['update']);
                 $query_param = array(
-                    str_replace('%', $this->param_char, "INSERT INTO %b %lb VALUES $var ON DUPLICATE KEY UPDATE ") . $update_str,
+                    str_replace('%', $this->param_char, "INSERT INTO %b %lc VALUES $var ON DUPLICATE KEY UPDATE ") . $update_str,
                     $table, $keys, $values);
                 $query_param = array_merge($query_param, $options['update']);
                 return $this->query(...$query_param);
@@ -526,7 +539,7 @@ final class MeekroDB
         }
 
         return $this->query(
-            str_replace('%', $this->param_char, "%l INTO %b %lb VALUES $var"),
+            str_replace('%', $this->param_char, "%l INTO %b %lc VALUES $var"),
             $which, $table, $keys, $values);
     }
 
@@ -689,6 +702,9 @@ final class MeekroDB
             'b' => function ($arg) use ($t) {
                 return $t->formatTableName($arg);
             },
+            'c' => function ($arg) use ($t) {
+                return $t->formatColumnName($arg);
+            },
             'l' => function ($arg) use ($t) {
                 return strval($arg);
             },
@@ -710,6 +726,9 @@ final class MeekroDB
             },
             'lb' => function ($arg) use ($t) {
                 return array_map(array($t, 'formatTableName'), $arg);
+            },
+            'lc' => function ($arg) use ($t) {
+                return array_map(array($t, 'formatColumnName'), $arg);
             },
             'll' => function ($arg) use ($t) {
                 return array_map('strval', $arg);
@@ -844,6 +863,11 @@ final class MeekroDB
         return $queryParts;
     }
 
+    protected function paramsMapArrayTypes(): array
+    {
+        return ['ls', 'li', 'ld', 'lb', 'lc', 'll', 'lt', 'l?', 'll?', 'hc', 'ha', 'ho'];
+    }
+
     /**
      * @param string $query
      * @param mixed ...$args
@@ -857,7 +881,7 @@ final class MeekroDB
         if (!$args) return $query;
         $queryParts = $this->preParse($query, $args);
 
-        $array_types = array('ls', 'li', 'ld', 'lb', 'll', 'lt', 'l?', 'll?', 'hc', 'ha', 'ho');
+        $array_types = $this->paramsMapArrayTypes();
         $Map = $this->paramsMap();
         $query = '';
         foreach ($queryParts as $Part) {
@@ -954,7 +978,7 @@ final class MeekroDB
             if (is_array($value)) {
                 $pairs = array();
                 foreach ($value as $k => $v) {
-                    $pairs[] = $this->formatTableName($k) . '=' . $this->sanitize($v);
+                    $pairs[] = $this->formatColumnName($k) . '=' . $this->sanitize($v);
                 }
 
                 return implode($hashjoin, $pairs);
